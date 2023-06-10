@@ -32,6 +32,7 @@ async function run() {
     await client.connect();
     const teacherCollection = client.db('SpeakEase').collection('teacherDb')
     const classesCollection = client.db('SpeakEase').collection('classesDb')
+    const cartCollection = client.db('SpeakEase').collection('cartDb')
 
 
 
@@ -42,6 +43,34 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+
+
+    //get classes collections 
+    app.get("/allclasses", async(req, res)=>{
+        const cursor = classesCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+
+
+// cart collection 
+app.post("/carts", async(req, res)=>{
+  const item = req.body
+  console.log(item)
+  const result = await cartCollection.insertOne(item)
+  res.send(result)
+})
+
+app.get("/carts/:email", async (req, res) => {
+ 
+  const result = await cartCollection
+    .find({
+      email: req.params.email,
+    })
+    .toArray();
+  res.send(result);
+});
 
 
 
