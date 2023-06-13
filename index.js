@@ -85,20 +85,17 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/carts/:email", async (req, res) => {
+    app.get("/carts",verifyJWT, async (req, res) => {
 
-      const email = req.params.email
+      const email = req.query.email
 
-      // const decodedEmail = req.decoded.email;
-      // if (email !== decodedEmail) {
-      //   return res.status(403).send({ error: true, message: 'forbidden access' })
-      // }
+      const decodedEmail = req.decoded.email;
+      if (email !== decodedEmail) {
+        return res.status(403).send({ error: true, message: 'forbidden access' })
+      }
 
-      const result = await cartCollection
-        .find({
-          email: email,
-        })
-        .toArray();
+      const query = { email: email };
+      const result = await cartCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -151,6 +148,22 @@ async function run() {
           role: "instructor",
         },
       };
+
+      //verify admin 
+      app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+        const email = req.params.email;
+  
+        if (req.decoded.email !== email) {
+          res.send({ admin: false })
+        }
+  
+        const query = { email: email }
+        const user = await usersCollection.findOne(query);
+        const result = { admin: user?.role === 'admin' }
+        res.send(result);
+      })
+
+      
 
       const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
