@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 var jwt = require("jsonwebtoken");
 const Stripe = require('stripe')
-const stripe = Stripe(process.env.PAYMENT_SECRET_KEY)
+const stripe = Stripe('sk_test_51NHpYAH2x9yrGo5Da7PAnrOaGj5UWHyJQdRQyQpUoD1WQ9NMRVozjAZgjr0QFqDXDkt4DwMrhzqJtTh6RL1dEQix00rCKpep21')
 
 
 //env
@@ -37,7 +37,8 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.h8icusb.mongodb.net/?retryWrites=true&w=majority`;
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ixwjzmq.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -56,6 +57,7 @@ async function run() {
     const classesCollection = client.db("SpeakEase").collection("classesDb");
     const cartCollection = client.db("SpeakEase").collection("cartDb");
     const usersCollection = client.db("SpeakEase").collection("userDb");
+    const paymentCollection = client.db("SpeakEase").collection("paymentDb");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -194,10 +196,10 @@ async function run() {
       const payment = req.body;
       const insertResult = await paymentCollection.insertOne(payment);
 
-      const query = { _id:  new ObjectId(id) }
-      const deleteResult = await cartCollection.deleteMany(query)
+      // const query = { _id:  new ObjectId(id) }
+      // const deleteResult = await cartCollection.deleteMany(query)
 
-      res.send({ insertResult, deleteResult });
+      res.send({ insertResult });
     })
 
 
