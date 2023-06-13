@@ -131,6 +131,7 @@ async function run() {
       res.send(result);
     });
 
+
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -145,6 +146,7 @@ async function run() {
       res.send(result);
     });
 
+
     app.patch("/users/instructor/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -154,6 +156,10 @@ async function run() {
           role: "instructor",
         },
       };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
 
       //verify admin 
       app.get('/users/admin/:email', verifyJWT, async (req, res) => {
@@ -171,9 +177,7 @@ async function run() {
 
 
 
-      const result = await usersCollection.updateOne(filter, updateDoc);
-      res.send(result);
-    });
+      
 
 
     //payment stripe code 
@@ -195,12 +199,44 @@ async function run() {
     app.post('/payments', verifyJWT, async (req, res) => {
       const payment = req.body;
       const insertResult = await paymentCollection.insertOne(payment);
+      const query = { _id: new ObjectId(payment.payClassId) }
+      const deleteResult = await cartCollection.deleteOne(query)
 
-      // const query = { _id:  new ObjectId(id) }
-      // const deleteResult = await cartCollection.deleteMany(query)
-
-      res.send({ insertResult });
+      res.send({ insertResult,deleteResult });
     })
+
+    app.patch('/allclasses/:id', async(req,res)=>{
+
+      const id = req.params.id
+      const query = {_id : new ObjectId(id)}
+      console.log(query);
+
+     
+      const update = { $inc: { availableSeats: -1, totalStudents: +1 } }
+
+      const result = await classesCollection.findOneAndUpdate(query, update); 
+      res.send(result)
+
+    })
+
+    app.get('/sortclass' , async(req,res)=>{
+      const cursor =  classesCollection.find().sort({totalStudents: -1}).limit(6)
+      const result = await cursor.toArray()
+      res.send(result)
+    
+    })
+
+    app.get('/payclass/:email', async(req,res)=>{
+      const email = req.params.email
+      const result = await paymentCollection
+        .find({
+          email: email,
+        })
+        .toArray();
+      res.send(result);
+    })
+
+
 
 
 
