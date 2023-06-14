@@ -52,7 +52,8 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
+
     const teacherCollection = client.db("SpeakEase").collection("teacherDb");
     const classesCollection = client.db("SpeakEase").collection("classesDb");
     const cartCollection = client.db("SpeakEase").collection("cartDb");
@@ -139,6 +140,7 @@ async function run() {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
 
 //cgange the role as admin 
     app.patch("/users/admin/:id", async (req, res) => {
@@ -293,10 +295,20 @@ async function run() {
     app.post('/teachers', async(req, res)=>{
 
       const newTeacher = req.body 
-      const result = await classesCollection.insertOne(newTeacher);
+      const query = { email: newTeacher.email };
+      const existingUser = await teacherCollection.findOne(query);
+
+      if (existingUser) {
+        return res.send({ message: "Teacher already exists" });
+      }
+      
+      const result = await teacherCollection.insertOne(newTeacher);
       res.send(result);
     })
 
+
+
+  
 
     app.get('/allclasses/:email', async(req,res)=>{
       const email = req.params.email
