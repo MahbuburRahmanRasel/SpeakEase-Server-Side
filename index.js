@@ -301,7 +301,7 @@ async function run() {
       if (existingUser) {
         return res.send({ message: "Teacher already exists" });
       }
-      
+
       const result = await teacherCollection.insertOne(newTeacher);
       res.send(result);
     })
@@ -312,7 +312,7 @@ async function run() {
 
     app.get('/allclasses/:email', async(req,res)=>{
       const email = req.params.email
-      const result = await teacherCollection
+      const result = await classesCollection
         .find({
           email:email,
         })
