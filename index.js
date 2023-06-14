@@ -245,7 +245,7 @@ async function run() {
     {
       $lookup: {
         from: 'classesDb',
-        localField: 'instructor',
+        localField: 'instructorName',
         foreignField: 'instructorName',
         as: 'classes'
       }
@@ -253,8 +253,8 @@ async function run() {
     {
       $project: {
         _id: 0,
-        instructor: 1,
-        image: 1,
+        instructorName: 1,
+        instructorImage: 1,
         language: 1,
         totalStudents: { $sum: '$classes.totalStudents' }
       }
@@ -281,6 +281,33 @@ async function run() {
     })
 
 
+    //Post a  classes 
+    app.post('/allclasses', async(req, res)=>{
+
+      const newClass = req.body 
+      const result = await classesCollection.insertOne(newClass);
+      res.send(result);
+    })
+
+    //Post teacher
+    app.post('/teachers', async(req, res)=>{
+
+      const newTeacher = req.body 
+      const result = await classesCollection.insertOne(newTeacher);
+      res.send(result);
+    })
+
+    app.get('/teachers/:email', async(req,res)=>{
+      const email = req.params.email
+      const result = await teacherCollection
+        .find({
+          email: email,
+        })
+        .toArray();
+      res.send(result);
+    })
+
+   
 
 
 
