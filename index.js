@@ -297,16 +297,46 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/teachers/:email', async(req,res)=>{
+
+    app.get('/allclasses/:email', async(req,res)=>{
       const email = req.params.email
       const result = await teacherCollection
         .find({
-          email: email,
+          email:email,
         })
         .toArray();
       res.send(result);
     })
 
+
+    //change the stauts as approved
+    app.patch("/allclasses/approved/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "approved",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+   
+    
+    //change the stauts as deny
+    app.patch("/allclasses/denied/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "denied",
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
    
 
 
