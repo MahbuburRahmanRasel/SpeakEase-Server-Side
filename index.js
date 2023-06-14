@@ -82,7 +82,7 @@ async function run() {
       res.send(result);
     });
 
-    // cart collection
+    // cart collection 
     app.post("/carts",  async (req, res) => {
       const item = req.body;
 
@@ -90,6 +90,8 @@ async function run() {
       res.send(result);
     });
 
+
+    // get all classes which student selected 
     app.get("/carts",verifyJWT, async (req, res) => {
 
       const email = req.query.email
@@ -104,6 +106,8 @@ async function run() {
       res.send(result);
     });
 
+
+
  // delete form cart  
     app.delete("/carts/:id", async (req, res) => {
       const id = req.params.id;
@@ -111,6 +115,7 @@ async function run() {
       const result = await cartCollection.deleteOne(query);
       res.send(result);
     });
+
 
     //user update
     app.post("/users", async (req, res) => {
@@ -126,12 +131,16 @@ async function run() {
       res.send(result);
     });
 
+
+
+//get all admin , intructor , students 
+
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
-
+//cgange the role as admin 
     app.patch("/users/admin/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -146,7 +155,7 @@ async function run() {
       res.send(result);
     });
 
-
+//change the role as instructor
     app.patch("/users/instructor/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
@@ -205,6 +214,8 @@ async function run() {
       res.send({ insertResult,deleteResult });
     })
 
+    //increase and decrease available seats and taotal student 
+
     app.patch('/allclasses/:id', async(req,res)=>{
 
       const id = req.params.id
@@ -219,6 +230,7 @@ async function run() {
 
     })
 
+    //popular student 
     app.get('/sortclass' , async(req,res)=>{
       const cursor =  classesCollection.find().sort({totalStudents: -1}).limit(6)
       const result = await cursor.toArray()
@@ -226,12 +238,44 @@ async function run() {
     
     })
 
+ // Popular teachers  
+ app.get("/popularteachers", async (req, res) => {
+
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'classesDb',
+        localField: 'instructor',
+        foreignField: 'instructorName',
+        as: 'classes'
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        instructor: 1,
+        image: 1,
+        language: 1,
+        totalStudents: { $sum: '$classes.totalStudents' }
+      }
+    }
+  ]
+  
+  const result = await teacherCollection.aggregate(pipeline).sort({totalStudents: -1}).limit(6).toArray()
+  res.send(result)
+
+
+});
+
+
+
+// get student payment clear classes 
     app.get('/payclass/:email', async(req,res)=>{
       const email = req.params.email
       const result = await paymentCollection
         .find({
           email: email,
-        })
+        }).sort({date: 1})
         .toArray();
       res.send(result);
     })
